@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academic Certificate Verification Portal</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-row">
+        <span class="logo-icon">&#127891;</span>
+        <div>
+          <h1>Academic Certificate Verification Portal</h1>
+          <p>Simple &amp; secure way to verify whether an academic certificate is genuine</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button type="button" id="btn-public" class="tab-btn active" onclick="showSection('public-section', this)">
+          Public Verification
+        </button>
+        <button type="button" id="btn-issuer" class="tab-btn" onclick="showSection('issuer-section', this)">
+          Issuer Portal
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 1. PUBLIC VERIFICATION SECTION -->
+    <section id="public-section">
+      <div class="card hero-card">
+        <span class="pill-tag">Third-Party Verification</span>
+        <h2>Verify a Certificate Record</h2>
+        <p class="subtitle">Enter the Unique Verification ID printed on the certificate or scan its QR code.</p>
+
+        <form class="search-box" onsubmit="verifyCertificate(); return false;">
+          <input type="text" id="verifyInput" placeholder="Enter Verification ID (e.g., LPU-CSE-57)" />
+          <button type="submit" class="btn-primary">Verify Now</button>
+        </form>
+
+        <div class="sample-chips">
+          <span class="chip-label">Try samples:</span>
+          <button type="button" class="chip" onclick="fillAndVerify('LPU-CSE-57')">
+            <span class="dot green"></span> LPU-CSE-57 &mdash; Souradeep (Valid)
+          </button>
+          <button type="button" class="chip" onclick="fillAndVerify('LPU-CSE-69')">
+            <span class="dot red"></span> LPU-CSE-69 &mdash; Krish (Revoked)
+          </button>
+          <button type="button" class="chip" onclick="fillAndVerify('LPU-CSE-09')">
+            <span class="dot purple"></span> LPU-CSE-09 &mdash; Rishab (Privacy Protected)
+          </button>
+        </div>
+
+        <p id="verifyError" class="error-msg"></p>
+      </div>
+
+      <!-- Verification Output Card -->
+      <div id="verifyResult" class="card result-card" style="display: none;">
+        <div id="resBanner" class="result-banner">
+          <div>
+            <h3 id="resStatusTitle"></h3>
+            <p id="resStatusSub" class="banner-sub"></p>
+          </div>
+          <span id="resStatusBadge" class="badge"></span>
+        </div>
+
+        <div class="result-body">
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Verification ID</span>
+              <span id="resId" class="detail-value code-text"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Student Name</span>
+              <span id="resName" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Roll Number</span>
+              <span id="resRoll" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Branch / Course</span>
+              <span id="resCourse" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">College / Institution</span>
+              <span id="resInstitution" class="detail-value"></span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Issue Date</span>
+              <span id="resDate" class="detail-value"></span>
+            </div>
+          </div>
+
+          <div class="qr-card">
+            <canvas id="publicQrCanvas" width="132" height="132"></canvas>
+            <small>Certificate QR Code</small>
+            <button type="button" class="btn-outline btn-sm" onclick="window.print()">Print Report</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Highlights -->
+      <div class="features-grid">
+        <div class="feature-item">
+          <h4>Instant Verification</h4>
+          <p>Employers and organizations can verify authenticity in one click using a unique ID.</p>
+        </div>
+        <div class="feature-item">
+          <h4>Live Status Check</h4>
+          <p>Clearly shows whether a certificate is Valid, Revoked, or Expired.</p>
+        </div>
+        <div class="feature-item">
+          <h4>Privacy Controls</h4>
+          <p>Institutions can mask student names or hide roll numbers from public view.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ISSUER SECTION (LOGIN + DASHBOARD) -->
+    <section id="issuer-section" style="display: none;">
+
+      <!-- Issuer Login Card -->
+      <div id="login-box" class="card login-card">
+        <span class="pill-tag">Authorized Institutions</span>
+        <h2>Issuer Portal Login</h2>
+        <p class="subtitle">Sign in to publish new academic certificates, update status, and view audit logs.</p>
+
+        <div class="demo-box">
+          <strong>Demo Credentials:</strong> Username: <code>admin</code> &nbsp;|&nbsp; Password: <code>1234</code>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter username (admin)" />
+
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password (1234)" />
+
+          <p id="loginError" class="error-msg"></p>
+          <button type="submit" class="btn-primary btn-full">Sign In</button>
+        </form>
+      </div>
+
+      <!-- Issuer Dashboard (Shown after Login) -->
+      <div id="dashboard-box" style="display: none;">
+
+        <!-- Top Bar & Stats -->
+        <div class="card dashboard-top">
+          <div>
+            <span class="pill-tag">Authorized Issuer</span>
+            <h2>Issuer Dashboard</h2>
+            <p class="subtitle">Signed in as <strong id="loggedUser"></strong></p>
+          </div>
+          <button type="button" class="btn-danger" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>Total Certificates</span>
+            <strong id="statTotal">0</strong>
+          </div>
+          <div class="stat-card stat-green">
+            <span>Valid Records</span>
+            <strong id="statValid">0</strong>
+          </div>
+          <div class="stat-card stat-red">
+            <span>Revoked / Expired</span>
+            <strong id="statInactive">0</strong>
+          </div>
+        </div>
+
+        <!-- Create Certificate Card -->
+        <div class="card">
+          <h3>Publish New Certificate Record</h3>
+          <form onsubmit="createCertificate(event)">
+            <div class="form-grid">
+              <div>
+                <label for="studentName">Student Name *</label>
+                <input type="text" id="studentName" placeholder="e.g., Riya Verma" />
+              </div>
+              <div>
+                <label for="rollNumber">Roll Number *</label>
+                <input type="text" id="rollNumber" placeholder="e.g., 57" />
+              </div>
+              <div>
+                <label for="courseName">Branch / Course *</label>
+                <input type="text" id="courseName" value="B.Tech CSE" placeholder="e.g., B.Tech CSE" />
+              </div>
+              <div>
+                <label for="institutionName">College Name *</label>
+                <input type="text" id="institutionName" value="Lovely Professional University" />
+              </div>
+              <div>
+                <label for="issueDate">Issue Date *</label>
+                <input type="date" id="issueDate" />
+              </div>
+              <div>
+                <label for="certStatus">Initial Status</label>
+                <select id="certStatus">
+                  <option value="Valid">Valid</option>
+                  <option value="Expired">Expired</option>
+                  <option value="Revoked">Revoked</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="privacy-box">
+              <strong>Privacy Controls</strong>
+              <label class="inline-check">
+                <input type="checkbox" id="hideRoll" />
+                Hide Roll Number on Public Verification Page
+              </label>
+              <label class="inline-check">
+                <input type="checkbox" id="maskName" />
+                Mask Student Name publicly (e.g., R**** V****)
+              </label>
+            </div>
+
+            <p id="createError" class="error-msg"></p>
+            <p id="createSuccess" class="success-msg"></p>
+            <button type="submit" class="btn-primary">Publish Certificate &amp; Generate ID / QR</button>
+          </form>
+        </div>
+
+        <!-- Published Records Table -->
+        <div class="card">
+          <h3>Published Certificate Records</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Verification ID</th>
+                  <th>Student</th>
+                  <th>Course</th>
+                  <th>Status</th>
+                  <th>Privacy</th>
+                  <th>Update Status</th>
+                </tr>
+              </thead>
+              <tbody id="recordsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Audit Log Table -->
+        <div class="card">
+          <h3>Audit Log</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Action</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Academic Certificate Verification Portal &bull; Built with HTML, CSS &amp; Basic JavaScript</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
